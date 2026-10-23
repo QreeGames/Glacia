@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import type { Guardian, DefenseSquad, MatchResult } from "../types";
 import { GuardianCard } from "./GuardianCard";
-import { Swords, RotateCcw, Award } from "lucide-react";
-import confetti from "canvas-confetti";
+import { Play, RotateCw, CheckCircle2, ShieldAlert } from "lucide-react";
 
 interface BattleArenaProps {
   mySquad: Guardian[];
@@ -25,15 +24,6 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
     try {
       const result = await onExecuteBattle();
       setMatchResult(result);
-
-      if (result.winner === result.attacker) {
-        confetti({
-          particleCount: 120,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ["#38bdf8", "#818cf8", "#f43f5e", "#fbbf24"]
-        });
-      }
     } finally {
       setIsBattling(false);
     }
@@ -41,21 +31,20 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Visual Arena Board */}
-      <div className="rounded-3xl border border-sky-500/20 bg-slate-950/70 p-6 relative overflow-hidden radar-grid shadow-[0_0_50px_rgba(0,0,0,0.8)]">
-        {/* Glow accent */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sky-500/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center relative z-10">
+      {/* Board & Formation */}
+      <div className="border border-[#242424] bg-[#0d0d0d] rounded-[2px] p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Attacking Squad (Player) */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div className="flex items-center justify-between border-b border-[#242424] pb-2">
               <div>
-                <h3 className="font-cinzel text-lg font-bold text-sky-300">Challenger Squad</h3>
-                <p className="text-[10px] font-mono uppercase text-slate-400">Deployed Attack Formation</p>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  Attacking Squad
+                </h3>
+                <p className="text-xs text-[#757575] font-mono">Challenger Formation</p>
               </div>
-              <span className="text-xs font-mono font-bold bg-sky-950 text-sky-400 border border-sky-800 px-2.5 py-1 rounded-lg">
-                {mySquad.length} Units
+              <span className="text-xs font-mono font-bold bg-[#1a1a1a] text-[#76b900] border border-[#2a2a2a] px-2 py-0.5 rounded-[2px]">
+                {mySquad.length} Units Active
               </span>
             </div>
 
@@ -66,52 +55,18 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
             </div>
           </div>
 
-          {/* VS Divider / Action CTA */}
-          <div className="flex flex-col items-center justify-center p-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 via-indigo-600 to-sky-500 p-0.5 shadow-[0_0_30px_rgba(244,63,94,0.3)] mb-4 flex items-center justify-center">
-              <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-                <Swords className="w-6 h-6 text-rose-400 animate-pulse" />
-              </div>
-            </div>
-
-            <button
-              onClick={handleStartBattle}
-              disabled={isBattling || mySquad.length === 0}
-              className={`w-full max-w-xs py-3.5 px-6 rounded-2xl font-cinzel font-bold text-sm uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-[0_0_30px_rgba(56,189,248,0.25)] flex items-center justify-center gap-2 ${
-                isBattling
-                  ? "bg-slate-800 text-slate-400 border border-slate-700 cursor-not-allowed"
-                  : "bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white border border-sky-400/50 hover:shadow-[0_0_40px_rgba(56,189,248,0.5)] active:scale-95"
-              }`}
-            >
-              {isBattling ? (
-                <>
-                  <RotateCcw className="w-4 h-4 animate-spin text-sky-400" />
-                  Resolving Soroban Turn...
-                </>
-              ) : (
-                <>
-                  <Swords className="w-4 h-4" />
-                  ENGAGE SQUAD BATTLE
-                </>
-              )}
-            </button>
-            <p className="text-[10px] font-mono text-slate-500 mt-2 uppercase tracking-wide">
-              Deterministic Simulation • Gasless Sponsored Relayer
-            </p>
-          </div>
-
           {/* Defending Squad (Target) */}
-          <div className="space-y-4 lg:col-start-2">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-[#242424] pb-2">
               <div>
-                <h3 className="font-cinzel text-lg font-bold text-purple-300">
-                  {targetSquad.playerName}
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  Target Squad: {targetSquad.playerName}
                 </h3>
-                <p className="text-[10px] font-mono uppercase text-slate-400">
-                  Rating: {targetSquad.rating} • Record: {targetSquad.wins}W / {targetSquad.losses}L
+                <p className="text-xs text-[#757575] font-mono">
+                  Rating: {targetSquad.rating} | Record: {targetSquad.wins}W - {targetSquad.losses}L
                 </p>
               </div>
-              <span className="text-xs font-mono font-bold bg-purple-950 text-purple-400 border border-purple-800 px-2.5 py-1 rounded-lg">
+              <span className="text-xs font-mono font-bold bg-[#1a1a1a] text-[#a7a7a7] border border-[#2a2a2a] px-2 py-0.5 rounded-[2px]">
                 On-Chain Defense
               </span>
             </div>
@@ -123,47 +78,77 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Action Trigger */}
+        <div className="mt-8 pt-6 border-t border-[#242424] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-xs font-mono text-[#757575]">
+            Combat is resolved deterministically by Soroban smart contract rules.
+          </div>
+
+          <button
+            onClick={handleStartBattle}
+            disabled={isBattling || mySquad.length === 0}
+            className={`px-8 py-3 rounded-[2px] font-mono text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
+              isBattling
+                ? "bg-[#1a1a1a] text-[#757575] border border-[#2a2a2a] cursor-not-allowed"
+                : "bg-[#76b900] text-black hover:bg-[#88d400] active:bg-[#5a8d00]"
+            }`}
+          >
+            {isBattling ? (
+              <>
+                <RotateCw className="w-4 h-4 animate-spin text-[#76b900]" />
+                Simulating Combat...
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 fill-current" />
+                Execute Match
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Combat Telemetry Console */}
+      {/* Structured Execution Log */}
       {matchResult && (
-        <div className="rounded-3xl border border-slate-800 bg-slate-950/90 p-6 space-y-4 shadow-[0_0_40px_rgba(0,0,0,0.9)]">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+        <div className="border border-[#242424] bg-[#0d0d0d] rounded-[2px] p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-[#242424] pb-3">
             <div className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-400" />
-              <h4 className="font-cinzel text-base font-bold text-slate-100">
-                Match Telemetry Record
+              {matchResult.winner === matchResult.attacker ? (
+                <CheckCircle2 className="w-5 h-5 text-[#76b900]" />
+              ) : (
+                <ShieldAlert className="w-5 h-5 text-[#e52020]" />
+              )}
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+                Match Result: {matchResult.winner === matchResult.attacker ? "Victory" : "Defeat"}
               </h4>
             </div>
-            <span className="text-xs font-mono text-sky-400">
-              Elapsed: {matchResult.turnsElapsed} Turns
+            <span className="text-xs font-mono text-[#757575]">
+              Duration: {matchResult.turnsElapsed} Turns
             </span>
           </div>
 
-          <div className="max-h-64 overflow-y-auto space-y-2 pr-2 font-mono text-xs">
+          <div className="max-h-64 overflow-y-auto space-y-1.5 pr-2 font-mono text-xs">
             {matchResult.logs.map((log, index) => (
               <div
                 key={index}
-                className={`p-2.5 rounded-xl border ${
-                  log.phase === "VICTORY"
-                    ? "bg-amber-950/40 border-amber-500/40 text-amber-300"
-                    : log.phase === "ELIMINATION"
-                    ? "bg-rose-950/40 border-rose-500/40 text-rose-300"
-                    : "bg-slate-900/40 border-slate-800/60 text-slate-300"
-                }`}
+                className="p-2.5 rounded-[2px] bg-[#141414] border border-[#202020] flex items-center justify-between"
               >
-                <div className="flex items-center justify-between text-[10px] text-slate-500 mb-0.5">
-                  <span>TURN {log.turn} • {log.phase}</span>
-                </div>
-                <div>{log.message}</div>
+                <span className="text-white">
+                  <span className="text-[#757575] mr-2">[Turn {log.turn}]</span>
+                  {log.message.replace(/[⚔️🛡️🔥❄️☠️🏆]/g, "")}
+                </span>
+                <span className="text-[10px] text-[#76b900] font-semibold uppercase">
+                  {log.phase}
+                </span>
               </div>
             ))}
           </div>
 
           {matchResult.receipt && (
-            <div className="pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex items-center justify-between">
-              <span>On-Chain Receipt: {matchResult.receipt.transactionHash.slice(0, 16)}...</span>
-              <span className="text-emerald-400 font-semibold">{matchResult.receipt.status}</span>
+            <div className="pt-3 border-t border-[#242424] text-xs font-mono text-[#757575] flex items-center justify-between">
+              <span>Transaction Receipt: {matchResult.receipt.transactionHash}</span>
+              <span className="text-[#76b900] font-bold">{matchResult.receipt.status}</span>
             </div>
           )}
         </div>

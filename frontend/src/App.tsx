@@ -4,15 +4,15 @@ import { Header } from "./components/Header";
 import { GuardianCard } from "./components/GuardianCard";
 import { BattleArena } from "./components/BattleArena";
 import { fetchGuardians, fetchDefenseSquads, submitChallenge } from "./services/api";
-import { Users, Shield, Sparkles, BookOpen } from "lucide-react";
+import { Users, Swords, FileText } from "lucide-react";
 
 export default function App() {
-  const [activeAddress, setActiveAddress] = useState<string>("GCHALLENGER_DEMO_WALLET_7777");
+  const [activeAddress, setActiveAddress] = useState<string>("GCHALLENGER_STELLAR_TESTNET");
   const [roster, setRoster] = useState<Guardian[]>([]);
   const [defenseSquads, setDefenseSquads] = useState<DefenseSquad[]>([]);
   const [selectedSquad, setSelectedSquad] = useState<Guardian[]>([]);
   const [selectedTarget, setSelectedTarget] = useState<DefenseSquad | null>(null);
-  const [activeTab, setActiveTab] = useState<"arena" | "roster" | "lore">("arena");
+  const [activeTab, setActiveTab] = useState<"arena" | "roster" | "rules">("arena");
 
   useEffect(() => {
     async function loadData() {
@@ -44,64 +44,60 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen bg-[#000000] text-white flex flex-col font-sans selection:bg-[#76b900] selection:text-black">
       <Header
         activeAddress={activeAddress}
-        isConnecting={false}
         onConnectWallet={() => {
-          setActiveAddress("GPLAYER_STELLAR_" + Math.random().toString(36).substring(2, 8).toUpperCase());
+          setActiveAddress("GPLAYER_" + Math.random().toString(36).substring(2, 10).toUpperCase());
         }}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-3 border-b border-slate-800/80 pb-4">
+        <div className="flex items-center gap-2 border-b border-[#242424] pb-4">
           <button
             onClick={() => setActiveTab("arena")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-[2px] text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "arena"
-                ? "bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_20px_rgba(56,189,248,0.2)]"
-                : "text-slate-400 hover:text-slate-200 border border-transparent"
+                ? "bg-[#1f1f1f] text-[#76b900] border-b-2 border-[#76b900]"
+                : "text-[#757575] hover:text-white"
             }`}
           >
-            <Shield className="w-4 h-4" /> Tactical Arena
+            <Swords className="w-3.5 h-3.5" /> Battle Arena
           </button>
           <button
             onClick={() => setActiveTab("roster")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-[2px] text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "roster"
-                ? "bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_20px_rgba(56,189,248,0.2)]"
-                : "text-slate-400 hover:text-slate-200 border border-transparent"
+                ? "bg-[#1f1f1f] text-[#76b900] border-b-2 border-[#76b900]"
+                : "text-[#757575] hover:text-white"
             }`}
           >
-            <Users className="w-4 h-4" /> Draft Squad ({selectedSquad.length}/4)
+            <Users className="w-3.5 h-3.5" /> Squad Formation ({selectedSquad.length}/4)
           </button>
           <button
-            onClick={() => setActiveTab("lore")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
-              activeTab === "lore"
-                ? "bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_20px_rgba(56,189,248,0.2)]"
-                : "text-slate-400 hover:text-slate-200 border border-transparent"
+            onClick={() => setActiveTab("rules")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-[2px] text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              activeTab === "rules"
+                ? "bg-[#1f1f1f] text-[#76b900] border-b-2 border-[#76b900]"
+                : "text-[#757575] hover:text-white"
             }`}
           >
-            <BookOpen className="w-4 h-4" /> Elemental Codex
+            <FileText className="w-3.5 h-3.5" /> Rules & Elemental Matrix
           </button>
         </div>
 
         {activeTab === "arena" && selectedTarget && (
           <div className="space-y-6">
-            {/* Target Squad Selector Bar */}
-            <div className="flex items-center justify-between bg-slate-900/50 border border-slate-800 rounded-2xl p-4">
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-5 h-5 text-sky-400" />
-                <div>
-                  <h3 className="font-cinzel text-sm font-bold text-slate-200">
-                    Active Defensive Strongholds
-                  </h3>
-                  <p className="text-[11px] font-mono text-slate-400">
-                    Select an opponent on-chain defense to challenge
-                  </p>
-                </div>
+            {/* Target Squad Selector */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#0d0d0d] border border-[#242424] rounded-[2px] p-4">
+              <div>
+                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                  Active Defense Formations
+                </h3>
+                <p className="text-xs text-[#757575] font-mono mt-0.5">
+                  Select a registered player squad to challenge
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -109,10 +105,10 @@ export default function App() {
                   <button
                     key={sq.id}
                     onClick={() => setSelectedTarget(sq)}
-                    className={`px-3.5 py-1.5 rounded-xl font-mono text-xs cursor-pointer border transition-all ${
+                    className={`px-3 py-1.5 rounded-[2px] font-mono text-xs cursor-pointer border transition-all ${
                       selectedTarget.id === sq.id
-                        ? "bg-sky-950 text-sky-300 border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.3)]"
-                        : "bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700"
+                        ? "bg-[#1a1a1a] text-[#76b900] border-[#76b900]"
+                        : "bg-[#121212] text-[#a7a7a7] border-[#2a2a2a] hover:border-[#404040]"
                     }`}
                   >
                     {sq.playerName}
@@ -131,12 +127,12 @@ export default function App() {
 
         {activeTab === "roster" && (
           <div className="space-y-4">
-            <div className="border-b border-slate-800 pb-2">
-              <h3 className="font-cinzel text-xl font-bold text-sky-300">
-                Elemental Champion Roster
+            <div className="border-b border-[#242424] pb-3">
+              <h3 className="text-base font-bold text-white uppercase tracking-tight">
+                Guardian Roster
               </h3>
-              <p className="text-xs font-mono text-slate-400">
-                Click units to compose your 1 to 4 guardian attack squad.
+              <p className="text-xs font-mono text-[#757575]">
+                Select between 1 and 4 units to compose your attacking squad.
               </p>
             </div>
 
@@ -156,41 +152,41 @@ export default function App() {
           </div>
         )}
 
-        {activeTab === "lore" && (
-          <div className="rounded-3xl border border-slate-800 bg-slate-950/80 p-6 sm:p-8 space-y-6">
-            <h3 className="font-cinzel text-2xl font-bold text-sky-300">
-              The Soroban Elemental Codex
-            </h3>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              In the frozen realm of Glacia, combat is governed by mathematical and elemental laws
-              etched directly into Stellar Soroban smart contracts. No human intervention or server
-              tampering can alter the outcome of a battle once committed to the ledger.
-            </p>
+        {activeTab === "rules" && (
+          <div className="border border-[#242424] bg-[#0d0d0d] rounded-[2px] p-6 space-y-6 font-mono text-xs">
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-1">
+                Soroban Smart Contract Battle Logic
+              </h3>
+              <p className="text-[#a7a7a7] leading-relaxed">
+                Glacia executes combat deterministically. Squad attributes, elemental damage multipliers, and turn order are validated by Soroban contracts on the Stellar network.
+              </p>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-              <div className="p-4 rounded-2xl bg-sky-950/40 border border-sky-500/30">
-                <h4 className="font-cinzel text-base font-bold text-sky-400 mb-1">Frost</h4>
-                <p className="text-xs text-slate-400">Strong against Void. Crushes ethereal entities beneath permafrost glaciers.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 rounded-[2px] bg-[#121212] border border-[#242424]">
+                <div className="text-sm font-bold text-[#38bdf8] mb-1">Frost</div>
+                <div className="text-[#a7a7a7]">Strong vs Void. Deals 1.5x damage against Void affinity targets.</div>
               </div>
-              <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/30">
-                <h4 className="font-cinzel text-base font-bold text-purple-400 mb-1">Void</h4>
-                <p className="text-xs text-slate-400">Strong against Prism. Consumes crystal refraction into singularity rifts.</p>
+              <div className="p-4 rounded-[2px] bg-[#121212] border border-[#242424]">
+                <div className="text-sm font-bold text-[#c084fc] mb-1">Void</div>
+                <div className="text-[#a7a7a7]">Strong vs Prism. Deals 1.5x damage against Prism affinity targets.</div>
               </div>
-              <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/30">
-                <h4 className="font-cinzel text-base font-bold text-amber-400 mb-1">Prism</h4>
-                <p className="text-xs text-slate-400">Strong against Flame. Disperses concentrated heat across crystalline shields.</p>
+              <div className="p-4 rounded-[2px] bg-[#121212] border border-[#242424]">
+                <div className="text-sm font-bold text-[#facc15] mb-1">Prism</div>
+                <div className="text-[#a7a7a7]">Strong vs Flame. Deals 1.5x damage against Flame affinity targets.</div>
               </div>
-              <div className="p-4 rounded-2xl bg-orange-950/40 border border-orange-500/30">
-                <h4 className="font-cinzel text-base font-bold text-orange-400 mb-1">Flame</h4>
-                <p className="text-xs text-slate-400">Strong against Frost. Liquefies ancient ice golems with concentrated magma.</p>
+              <div className="p-4 rounded-[2px] bg-[#121212] border border-[#242424]">
+                <div className="text-sm font-bold text-[#ef9100] mb-1">Flame</div>
+                <div className="text-[#a7a7a7]">Strong vs Frost. Deals 1.5x damage against Frost affinity targets.</div>
               </div>
             </div>
           </div>
         )}
       </main>
 
-      <footer className="border-t border-slate-900 bg-slate-950/90 py-6 px-4 text-center text-xs font-mono text-slate-500">
-        GLACIA • Open-Source Web3 Battler by <a href="https://github.com/QreeGames" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">QreeGames</a> • Powered by Stellar Soroban
+      <footer className="border-t border-[#242424] bg-[#000000] py-4 px-4 text-center text-xs font-mono text-[#757575]">
+        Glacia • Built for Stellar Soroban by <a href="https://github.com/QreeGames" target="_blank" rel="noopener noreferrer" className="text-[#76b900] hover:underline">QreeGames</a> • Open-Source MIT
       </footer>
     </div>
   );
