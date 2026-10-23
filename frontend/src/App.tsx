@@ -53,37 +53,37 @@ export default function App() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-[#242424] pb-4">
+        {/* NVIDIA Segmented Navigation Control */}
+        <div className="flex items-center gap-1 border-b border-[#242424] pb-3">
           <button
             onClick={() => setActiveTab("arena")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-[2px] text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-[2px] text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "arena"
-                ? "bg-[#1f1f1f] text-[#76b900] border-b-2 border-[#76b900]"
-                : "text-[#757575] hover:text-white"
+                ? "bg-[#76b900] text-black shadow-[0_0_15px_rgba(118,185,0,0.3)]"
+                : "bg-transparent text-[#a7a7a7] hover:text-white hover:bg-[#121212]"
             }`}
           >
-            <Swords className="w-3.5 h-3.5" /> Battle Arena
+            <Swords className="w-4 h-4" /> Tactical Arena
           </button>
           <button
             onClick={() => setActiveTab("roster")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-[2px] text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-[2px] text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "roster"
-                ? "bg-[#1f1f1f] text-[#76b900] border-b-2 border-[#76b900]"
-                : "text-[#757575] hover:text-white"
+                ? "bg-[#76b900] text-black shadow-[0_0_15px_rgba(118,185,0,0.3)]"
+                : "bg-transparent text-[#a7a7a7] hover:text-white hover:bg-[#121212]"
             }`}
           >
-            <Users className="w-3.5 h-3.5" /> Squad Formation ({selectedSquad.length}/4)
+            <Users className="w-4 h-4" /> Draft Squads ({selectedSquad.length}/4)
           </button>
           <button
             onClick={() => setActiveTab("rules")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-[2px] text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-[2px] text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === "rules"
-                ? "bg-[#1f1f1f] text-[#76b900] border-b-2 border-[#76b900]"
-                : "text-[#757575] hover:text-white"
+                ? "bg-[#76b900] text-black shadow-[0_0_15px_rgba(118,185,0,0.3)]"
+                : "bg-transparent text-[#a7a7a7] hover:text-white hover:bg-[#121212]"
             }`}
           >
-            <FileText className="w-3.5 h-3.5" /> Rules & Elemental Matrix
+            <FileText className="w-4 h-4" /> Elemental Codex
           </button>
         </div>
 
@@ -105,7 +105,7 @@ export default function App() {
                   <button
                     key={sq.id}
                     onClick={() => setSelectedTarget(sq)}
-                    className={`px-3 py-1.5 rounded-[2px] font-mono text-xs cursor-pointer border transition-all ${
+                    className={`px-3.5 py-1.5 rounded-[2px] font-mono text-xs cursor-pointer border transition-all ${
                       selectedTarget.id === sq.id
                         ? "bg-[#1a1a1a] text-[#76b900] border-[#76b900]"
                         : "bg-[#121212] text-[#a7a7a7] border-[#2a2a2a] hover:border-[#404040]"
