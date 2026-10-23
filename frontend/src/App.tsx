@@ -1,106 +1,197 @@
-import { useState } from "react";
-import type { Guardian, DefenseSquad } from "./types";
-
-const ROSTER: Guardian[] = [
-  { id: 1, name: "Glacial Golem", element: "frost", hp: 140, maxHp: 140, attack: 28, defense: 18, position: 0, icon: "❄️" },
-  { id: 2, name: "Blizzard Mage", element: "frost", hp: 90, maxHp: 90, attack: 35, defense: 8, position: 1, icon: "🧙‍♂️" },
-  { id: 3, name: "Inferno Drake", element: "flame", hp: 130, maxHp: 130, attack: 36, defense: 10, position: 2, icon: "🔥" },
-  { id: 4, name: "Void Stalker", element: "void", hp: 110, maxHp: 110, attack: 30, defense: 12, position: 4, icon: "🌑" },
-  { id: 5, name: "Prism Sentinel", element: "prism", hp: 120, maxHp: 120, attack: 32, defense: 14, position: 5, icon: "💎" },
-];
-
-const ENEMY_SQUADS: DefenseSquad[] = [
-  {
-    player: "GDEFENDER111...",
-    playerName: "Frost Monarch",
-    wins: 14,
-    losses: 3,
-    guardians: [
-      { id: 10, name: "Glacial Titan", element: "frost", hp: 150, maxHp: 150, attack: 30, defense: 20, position: 0, icon: "❄️" },
-      { id: 11, name: "Ice Sorceress", element: "frost", hp: 85, maxHp: 85, attack: 38, defense: 8, position: 1, icon: "🧙‍♀️" },
-    ]
-  }
-];
+import { useState, useEffect } from "react";
+import type { Guardian, DefenseSquad, MatchResult } from "./types";
+import { Header } from "./components/Header";
+import { GuardianCard } from "./components/GuardianCard";
+import { BattleArena } from "./components/BattleArena";
+import { fetchGuardians, fetchDefenseSquads, submitChallenge } from "./services/api";
+import { Users, Shield, Sparkles, BookOpen } from "lucide-react";
 
 export default function App() {
-  const [mySquad] = useState<Guardian[]>([ROSTER[0], ROSTER[2]]);
-  const [battleLog, setBattleLog] = useState<string[]>([]);
-  const [isBattling, setIsBattling] = useState(false);
+  const [activeAddress, setActiveAddress] = useState<string>("GCHALLENGER_DEMO_WALLET_7777");
+  const [roster, setRoster] = useState<Guardian[]>([]);
+  const [defenseSquads, setDefenseSquads] = useState<DefenseSquad[]>([]);
+  const [selectedSquad, setSelectedSquad] = useState<Guardian[]>([]);
+  const [selectedTarget, setSelectedTarget] = useState<DefenseSquad | null>(null);
+  const [activeTab, setActiveTab] = useState<"arena" | "roster" | "lore">("arena");
 
-  const handleFight = () => {
-    setIsBattling(true);
-    setBattleLog([
-      "⚔️ Connecting to Stellar Soroban contract...",
-      "🛡️ Deployed squad challenged 'Frost Monarch'...",
-      "🔥 Inferno Drake attacks Glacial Titan (Elemental Advantage: 1.5x damage!)",
-      "❄️ Glacial Titan retaliates!",
-      "🎉 Attacker squad victorious! Winner: You (Recorded on-chain)"
-    ]);
-    setTimeout(() => {
-      setIsBattling(false);
-    }, 1200);
+  useEffect(() => {
+    async function loadData() {
+      const g = await fetchGuardians();
+      const s = await fetchDefenseSquads();
+      setRoster(g);
+      setDefenseSquads(s);
+      setSelectedSquad([g[0], g[2]]);
+      if (s.length > 0) setSelectedTarget(s[0]);
+    }
+    loadData();
+  }, []);
+
+  const toggleSelectGuardian = (guardian: Guardian) => {
+    if (selectedSquad.some((g) => g.id === guardian.id)) {
+      if (selectedSquad.length > 1) {
+        setSelectedSquad(selectedSquad.filter((g) => g.id !== guardian.id));
+      }
+    } else {
+      if (selectedSquad.length < 4) {
+        setSelectedSquad([...selectedSquad, guardian]);
+      }
+    }
+  };
+
+  const handleExecuteBattle = async (): Promise<MatchResult> => {
+    if (!selectedTarget) throw new Error("No target selected");
+    return submitChallenge(activeAddress, selectedTarget.player, selectedSquad);
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF0] p-4 sm:p-8 text-black">
-      <header className="border-4 border-black bg-[#FFE600] p-4 mb-6 shadow-[6px_6px_0px_#000] flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight">GLACIA ❄️⚔️</h1>
-          <p className="text-xs font-bold uppercase tracking-wider text-black">On-Chain Tactical Battle Arena on Stellar</p>
-        </div>
-        <span className="bg-black text-[#FFE600] px-3 py-1 font-black text-xs uppercase border-2 border-black">
-          SOROBAN V22
-        </span>
-      </header>
+    <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col selection:bg-sky-500 selection:text-white">
+      <Header
+        activeAddress={activeAddress}
+        isConnecting={false}
+        onConnectWallet={() => {
+          setActiveAddress("GPLAYER_STELLAR_" + Math.random().toString(36).substring(2, 8).toUpperCase());
+        }}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-        {/* Squad Selection */}
-        <div className="border-4 border-black bg-white p-6 shadow-[6px_6px_0px_#000]">
-          <h2 className="text-lg font-black uppercase mb-4 border-b-2 border-black pb-2">Your Battle Squad</h2>
-          <div className="space-y-3">
-            {mySquad.map((g) => (
-              <div key={g.id} className="border-3 border-black p-3 bg-[#E0F7FA] flex justify-between items-center shadow-[3px_3px_0px_#000]">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{g.icon}</span>
-                  <div>
-                    <p className="font-black text-sm uppercase">{g.name}</p>
-                    <p className="text-[10px] font-bold text-gray-700 uppercase">HP: {g.hp} | ATK: {g.attack} | DEF: {g.defense}</p>
-                  </div>
-                </div>
-                <span className="border-2 border-black px-2 py-0.5 font-black text-[10px] uppercase bg-white">
-                  {g.element}
-                </span>
-              </div>
-            ))}
-          </div>
-
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-8">
+        {/* Navigation Tabs */}
+        <div className="flex items-center gap-3 border-b border-slate-800/80 pb-4">
           <button
-            onClick={handleFight}
-            disabled={isBattling}
-            className="mt-6 w-full bg-[#00FF66] hover:bg-[#32ff87] text-black border-4 border-black py-4 font-black text-sm uppercase tracking-wider shadow-[4px_4px_0px_#000] cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+            onClick={() => setActiveTab("arena")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              activeTab === "arena"
+                ? "bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_20px_rgba(56,189,248,0.2)]"
+                : "text-slate-400 hover:text-slate-200 border border-transparent"
+            }`}
           >
-            {isBattling ? "BATTLE IN PROGRESS..." : "CHALLENGE FROST MONARCH ▶"}
+            <Shield className="w-4 h-4" /> Tactical Arena
+          </button>
+          <button
+            onClick={() => setActiveTab("roster")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              activeTab === "roster"
+                ? "bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_20px_rgba(56,189,248,0.2)]"
+                : "text-slate-400 hover:text-slate-200 border border-transparent"
+            }`}
+          >
+            <Users className="w-4 h-4" /> Draft Squad ({selectedSquad.length}/4)
+          </button>
+          <button
+            onClick={() => setActiveTab("lore")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              activeTab === "lore"
+                ? "bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-[0_0_20px_rgba(56,189,248,0.2)]"
+                : "text-slate-400 hover:text-slate-200 border border-transparent"
+            }`}
+          >
+            <BookOpen className="w-4 h-4" /> Elemental Codex
           </button>
         </div>
 
-        {/* Battle Arena & Logs */}
-        <div className="border-4 border-black bg-[#E0F7FA]/40 p-6 shadow-[6px_6px_0px_#000]">
-          <h2 className="text-lg font-black uppercase mb-4 border-b-2 border-black pb-2">Target Defender</h2>
-          <div className="bg-[#FFE600]/30 border-3 border-black p-3 mb-4 shadow-[3px_3px_0px_#000]">
-            <p className="font-black text-sm uppercase">{ENEMY_SQUADS[0].playerName}</p>
-            <p className="text-[11px] font-bold text-gray-800">Wins: {ENEMY_SQUADS[0].wins} | Losses: {ENEMY_SQUADS[0].losses}</p>
-          </div>
+        {activeTab === "arena" && selectedTarget && (
+          <div className="space-y-6">
+            {/* Target Squad Selector Bar */}
+            <div className="flex items-center justify-between bg-slate-900/50 border border-slate-800 rounded-2xl p-4">
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-5 h-5 text-sky-400" />
+                <div>
+                  <h3 className="font-cinzel text-sm font-bold text-slate-200">
+                    Active Defensive Strongholds
+                  </h3>
+                  <p className="text-[11px] font-mono text-slate-400">
+                    Select an opponent on-chain defense to challenge
+                  </p>
+                </div>
+              </div>
 
-          <h3 className="text-xs font-black uppercase mb-2">Combat Telemetry</h3>
-          <div className="border-3 border-black bg-black text-[#00FF66] p-4 font-mono text-xs min-h-[160px] space-y-1.5 shadow-[3px_3px_0px_#000]">
-            {battleLog.length === 0 ? (
-              <p className="text-gray-500">Ready to simulate Soroban contract battle...</p>
-            ) : (
-              battleLog.map((log, i) => <p key={i}>{log}</p>)
-            )}
+              <div className="flex items-center gap-2">
+                {defenseSquads.map((sq) => (
+                  <button
+                    key={sq.id}
+                    onClick={() => setSelectedTarget(sq)}
+                    className={`px-3.5 py-1.5 rounded-xl font-mono text-xs cursor-pointer border transition-all ${
+                      selectedTarget.id === sq.id
+                        ? "bg-sky-950 text-sky-300 border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.3)]"
+                        : "bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700"
+                    }`}
+                  >
+                    {sq.playerName}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <BattleArena
+              mySquad={selectedSquad}
+              targetSquad={selectedTarget}
+              onExecuteBattle={handleExecuteBattle}
+            />
           </div>
-        </div>
-      </div>
+        )}
+
+        {activeTab === "roster" && (
+          <div className="space-y-4">
+            <div className="border-b border-slate-800 pb-2">
+              <h3 className="font-cinzel text-xl font-bold text-sky-300">
+                Elemental Champion Roster
+              </h3>
+              <p className="text-xs font-mono text-slate-400">
+                Click units to compose your 1 to 4 guardian attack squad.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {roster.map((guardian) => {
+                const isSelected = selectedSquad.some((g) => g.id === guardian.id);
+                return (
+                  <GuardianCard
+                    key={guardian.id}
+                    guardian={guardian}
+                    isSelected={isSelected}
+                    onSelect={() => toggleSelectGuardian(guardian)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "lore" && (
+          <div className="rounded-3xl border border-slate-800 bg-slate-950/80 p-6 sm:p-8 space-y-6">
+            <h3 className="font-cinzel text-2xl font-bold text-sky-300">
+              The Soroban Elemental Codex
+            </h3>
+            <p className="text-slate-300 text-sm leading-relaxed">
+              In the frozen realm of Glacia, combat is governed by mathematical and elemental laws
+              etched directly into Stellar Soroban smart contracts. No human intervention or server
+              tampering can alter the outcome of a battle once committed to the ledger.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+              <div className="p-4 rounded-2xl bg-sky-950/40 border border-sky-500/30">
+                <h4 className="font-cinzel text-base font-bold text-sky-400 mb-1">Frost</h4>
+                <p className="text-xs text-slate-400">Strong against Void. Crushes ethereal entities beneath permafrost glaciers.</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/30">
+                <h4 className="font-cinzel text-base font-bold text-purple-400 mb-1">Void</h4>
+                <p className="text-xs text-slate-400">Strong against Prism. Consumes crystal refraction into singularity rifts.</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/30">
+                <h4 className="font-cinzel text-base font-bold text-amber-400 mb-1">Prism</h4>
+                <p className="text-xs text-slate-400">Strong against Flame. Disperses concentrated heat across crystalline shields.</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-orange-950/40 border border-orange-500/30">
+                <h4 className="font-cinzel text-base font-bold text-orange-400 mb-1">Flame</h4>
+                <p className="text-xs text-slate-400">Strong against Frost. Liquefies ancient ice golems with concentrated magma.</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <footer className="border-t border-slate-900 bg-slate-950/90 py-6 px-4 text-center text-xs font-mono text-slate-500">
+        GLACIA • Open-Source Web3 Battler by <a href="https://github.com/QreeGames" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">QreeGames</a> • Powered by Stellar Soroban
+      </footer>
     </div>
   );
 }
